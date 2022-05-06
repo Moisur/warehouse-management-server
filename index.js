@@ -29,7 +29,24 @@ async function run() {
             const result = await cursor.limit(6).toArray();
             res.send(result)
         })
-        
+        /*  http://localhost:5000/MyItems */
+        app.get('/items', async (req, res) => {
+            const query = req.query;
+            if (query) {
+                const cursor = collection.find(req.query);
+                const result = await cursor.toArray();
+                res.send(result)
+            }
+            else{
+                const query = {};
+                const cursor = collection.find(query);
+                const result = await cursor.toArray();
+                res.send(result)
+            }
+
+
+        })
+
 
         /* single product load link: http://localhost:5000/products/6274004280571e94e2338b8f 1000*/
         app.get('/products/:id', async (req, res) => {
@@ -52,10 +69,10 @@ async function run() {
             const options = { upsert: true };
             const updateDoc = {
                 $set: {
-                    quantity:data
+                    quantity: data
                 },
-              };
-            const result = await collection.updateOne(filter,options,updateDoc);
+            };
+            const result = await collection.updateOne(filter, options, updateDoc);
             res.send(result)
         })
     } finally {
