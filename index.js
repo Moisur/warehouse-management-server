@@ -29,7 +29,7 @@ async function run() {
             const result = await cursor.limit(6).toArray();
             res.send(result)
         })
-        /*  http://localhost:5000/MyItems */
+        /*  http://localhost:5000/items 10000000*/
         app.get('/items', async (req, res) => {
             const query = req.query;
             if (query) {
@@ -37,17 +37,13 @@ async function run() {
                 const result = await cursor.toArray();
                 res.send(result)
             }
-            else{
+            else {
                 const query = {};
                 const cursor = collection.find(query);
                 const result = await cursor.toArray();
                 res.send(result)
             }
-
-
         })
-
-
         /* single product load link: http://localhost:5000/products/6274004280571e94e2338b8f 1000*/
         app.get('/products/:id', async (req, res) => {
             const id = req.params.id;
@@ -61,18 +57,29 @@ async function run() {
             const result = await collection.insertOne(query);
             res.send(result)
         })
+        /* item delete 100000*/
+        app.delete('/items/:id',async(req,res)=>{
+            const query = req.params.id;
+            const filter = { _id: ObjectId(query) };
+            console.log(filter)
+            const result = await collection.deleteOne(filter);
+            res.send(result)
+        })
+
         /* Product put  */
         app.put('/products/:id', async (req, res) => {
             const id = req.params.id;
-            const data = req.body;
+            const data = req.body
+            console.log(id)
+            console.log(data)
             const filter = { _id: ObjectId(id) };
             const options = { upsert: true };
             const updateDoc = {
                 $set: {
-                    quantity: data
+                    quantity: data.quantity
                 },
             };
-            const result = await collection.updateOne(filter, options, updateDoc);
+            const result = await collection.updateOne(filter,updateDoc,options);
             res.send(result)
         })
     } finally {
