@@ -67,11 +67,9 @@ async function run() {
         })
 
         /* Product put  */
-        app.put('/products/:id', async (req, res) => {
+        app.put('/items/:id', async (req, res) => {
             const id = req.params.id;
             const data = req.body
-            console.log(id)
-            console.log(data)
             const filter = { _id: ObjectId(id) };
             const options = { upsert: true };
             const updateDoc = {
@@ -93,12 +91,6 @@ app.get('/', (req, res) => {
 
     res.send("hi")
 })
-
-
-
-
-
-
 
 app.listen(port, () => {
     console.log('My website text', port)
