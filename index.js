@@ -11,13 +11,18 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.f4zlw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-// client.connect(err => {
-//   const collection = client.db("test").collection("devices");
-//   console.log("add  mongod db")
-//   // perform actions on the collection object
-//   client.close();
-// });
 
+function verifyToken(token) {
+    let email;
+    jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
+        if (err) {
+            email = 'Invalid Email'
+        }
+        if (decoded) {
+            email = decoded
+        }
+    })
+}
 async function run() {
     try {
         await client.connect();
@@ -50,9 +55,7 @@ async function run() {
                     result = await cursor.toArray()
                 }
                 res.send(result)
-                // const cursor = collection.find(query);
-                // const result = await cursor.toArray();
-                // res.send(result)
+               
             }
         })
         app.get('/itemsCount', async (req, res) => {
@@ -98,6 +101,31 @@ async function run() {
             const result = await collection.updateOne(filter,updateDoc,options);
             res.send(result)
         })
+        // jwr
+        app.post('/product', async (req, res) => {
+            const product = req.body;
+            const accessToken = req.body.token;
+            const email = product.email;
+            console.log(email);
+            const decoded = verifyToken(accessToken);
+            console.log(decoded.email);
+            if (email === decoded.email) {
+
+                if (!product.name || !product.price || !product.image || !product.quantity || !product.SPName || !product.details) {
+                    return res.send({ success: false, error: Please })
+                }
+                await collection.insertOne(product);
+                res.send({ success: true, message: SuccesFully  })
+            }
+            else {
+                res.send({ success: 'UnAuthoraized Access' })
+            }
+
+        })
+
+
+
+
     } finally {
         //   await client.close();
     }
@@ -113,3 +141,4 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log('My website text', port)
 })
+
