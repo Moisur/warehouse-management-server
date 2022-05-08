@@ -29,20 +29,38 @@ async function run() {
             const result = await cursor.limit(6).toArray();
             res.send(result)
         })
+        
         /*  http://localhost:5000/items 10000000*/
         app.get('/items', async (req, res) => {
             const query = req.query;
-            if (query) {
+            if (query.email) {
                 const cursor = collection.find(req.query);
                 const result = await cursor.toArray();
                 res.send(result)
             }
             else {
-                const query = {};
+                const pages = parseInt(req.query.pages);
+                const size = parseInt(req.query.sizes);
+                const query={}
                 const cursor = collection.find(query);
-                const result = await cursor.toArray();
+                let result;
+                if(pages || size){
+                    result= await cursor.skip(pages*size).limit(size).toArray()
+                }else{
+                    result = await cursor.toArray()
+                }
                 res.send(result)
+                // const cursor = collection.find(query);
+                // const result = await cursor.toArray();
+                // res.send(result)
             }
+        })
+        app.get('/itemsCount', async (req, res) => {
+            // const query = {};
+            // const cursor = collection.find(query);
+            // const count = collection.count(count)
+            const result = await collection.estimatedDocumentCount();
+            res.send({result})
         })
         /* single product load link: http://localhost:5000/products/6274004280571e94e2338b8f 1000*/
         app.get('/products/:id', async (req, res) => {
